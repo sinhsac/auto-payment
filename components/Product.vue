@@ -25,7 +25,7 @@ const {product} = props;
             <div style="flex-grow: 1; flex-shrink: 0; max-width: 170.8px; box-sizing: border-box;">
               <div class="price">₫ {{ getProductPrice(product) }}</div>
             </div>
-            <div style="flex-shrink: 1; min-width: 0px; overflow: hidden; box-sizing: border-box;">Đã bán 1</div>
+            <div style="flex-shrink: 1; min-width: 0px; overflow: hidden; box-sizing: border-box;">Đã bán {{getCoundSold(product)}}</div>
           </div>
           <div class="flex btn-info" style="line-height: 30px">
             <a style="flex-grow: 1; flex-shrink: 0; max-width: 170.8px; box-sizing: border-box;"
@@ -54,6 +54,9 @@ export default {
     },
     getShopeeLink(product: any): string {
       return `https://shopee.vn/product/${product.item.shop_id}/${product.item.item_id}`;
+    },
+    getCoundSold(product: any): number {
+      return product.product_review.historical_sold;
     }
   }
 }
