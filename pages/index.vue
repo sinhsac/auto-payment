@@ -9,16 +9,8 @@ const debug = ref(route.query.debug ? route.query.debug : '')
 </script>
 
 <template>
-  <div class="container-info">
-    <div class="heading">
-
-    </div>
-    <div class="product-list">
-      <Product v-for="p in data.products" :product="p" :key="p.item.item_id"></Product>
-    </div>
-    <pre v-if="debug == 'true'">
-      {{ data.products }}
-    </pre>
+  <div>
+    <ShopWithTab />
   </div>
 
 </template>
