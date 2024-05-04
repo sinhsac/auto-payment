@@ -40,8 +40,8 @@
       <div class="container">
         <nav class="navbar navbar-expand-lg">
           <a class="navbar-brand" href="/">
-            <img class="logo_light" src="assets/images/logo_light.png" alt="logo"/>
-            <img class="logo_dark" src="assets/images/logo_dark.png" alt="logo"/>
+            <img class="logo_light" src="/assets/images/logo_light.png" alt="logo"/>
+            <img class="logo_dark" src="/assets/images/logo_dark.png" alt="logo"/>
           </a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                   data-bs-target="#navbarSupportedContent" aria-expanded="false">
@@ -141,7 +141,7 @@
                   <div class="d-lg-flex menu_banners row g-3 px-3">
                     <div class="col-sm-4">
                       <div class="header-banner">
-                        <img src="assets/images/menu_banner1.jpg" alt="menu_banner1">
+                        <img src="/assets/images/menu_banner1.jpg" alt="menu_banner1">
                         <div class="banne_info">
                           <h6>10% Off</h6>
                           <h4>New Arrival</h4>
@@ -151,7 +151,7 @@
                     </div>
                     <div class="col-sm-4">
                       <div class="header-banner">
-                        <img src="assets/images/menu_banner2.jpg" alt="menu_banner2">
+                        <img src="/assets/images/menu_banner2.jpg" alt="menu_banner2">
                         <div class="banne_info">
                           <h6>15% Off</h6>
                           <h4>Men's Fashion</h4>
@@ -161,7 +161,7 @@
                     </div>
                     <div class="col-sm-4">
                       <div class="header-banner">
-                        <img src="assets/images/menu_banner3.jpg" alt="menu_banner3">
+                        <img src="/assets/images/menu_banner3.jpg" alt="menu_banner3">
                         <div class="banne_info">
                           <h6>23% Off</h6>
                           <h4>Kids Fashion</h4>
@@ -294,7 +294,7 @@
                         <div class="header_banner_content">
                           <div class="shop_banner">
                             <div class="banner_img overlay_bg_40">
-                              <img src="assets/images/shop_banner.jpg" alt="shop_banner"/>
+                              <img src="/assets/images/shop_banner.jpg" alt="shop_banner"/>
                             </div>
                             <div class="shop_bn_content">
                               <h5 class="text-uppercase shop_subtitle">New Collection</h5>
@@ -328,13 +328,13 @@
                 <ul class="cart_list">
                   <li>
                     <a href="#" class="item_remove"><i class="ion-close"></i></a>
-                    <a href="#"><img src="assets/images/cart_thamb1.jpg" alt="cart_thumb1">Variable product 001</a>
+                    <a href="#"><img src="/assets/images/cart_thamb1.jpg" alt="cart_thumb1">Variable product 001</a>
                     <span class="cart_quantity"> 1 x <span class="cart_amount"> <span
                         class="price_symbole">$</span></span>78.00</span>
                   </li>
                   <li>
                     <a href="#" class="item_remove"><i class="ion-close"></i></a>
-                    <a href="#"><img src="assets/images/cart_thamb2.jpg" alt="cart_thumb2">Ornare sed consequat</a>
+                    <a href="#"><img src="/assets/images/cart_thamb2.jpg" alt="cart_thumb2">Ornare sed consequat</a>
                     <span class="cart_quantity"> 1 x <span class="cart_amount"> <span
                         class="price_symbole">$</span></span>81.00</span>
                   </li>
