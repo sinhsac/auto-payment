@@ -1,7 +1,7 @@
 <script setup lang="ts">
-const state = useState('shopping-cart', () => {
-  return {}
-});
+import {cartItems} from "~/composables/state";
+
+const cart = cartItems();
 const props = defineProps({
   product: {
     type: Object,
@@ -10,6 +10,42 @@ const props = defineProps({
 });
 
 const {product} = props;
+
+const getImgSrc = (product: any) => {
+  const prod_imgs = product['product_images']['images'];
+  const first_img = prod_imgs[0]
+  return `https://down-vn.img.susercontent.com/file/${first_img}`
+}
+
+const getProductPrice = (product: any) => {
+  return (product.item.price / 100000)
+      .toLocaleString('it-IT', {style: 'currency', currency: 'VND'})
+      .replace('VND', '');
+}
+
+const addToCart = (product: any) => {
+  let item = cart.value.find(p => p.id == product.item.item_id)
+
+  let prod = {
+    id: product.item.item_id,
+    shop_id: product.item.shop_id,
+    title: product.item.title,
+    price: (product.item.price / 100000),
+    strPrice: getProductPrice(product),
+    image: getImgSrc(product),
+    qty: 1,
+  };
+
+  if (!item) {
+    item = prod
+    cart.value.push(prod);
+  } else {
+    item.qty = item.qty + 1
+  }
+
+  console.log(item)
+}
+
 
 </script>
 
@@ -22,8 +58,8 @@ const {product} = props;
       <div class="product_action_box">
         <ul class="list_none pr_action_btn">
           <li class="add-to-cart"><a href="javascript:;" @click="addToCart(product)"><i class="icon-basket-loaded"></i> Add To Cart</a></li>
-          <li><a href="shop-quick-view.html" class="popup-ajax"><i class="icon-magnifier-add"></i></a></li>
-          <li><a href="#"><i class="icon-heart"></i></a></li>
+          <li><a href="javascript:;" class="popup-ajax"><i class="icon-magnifier-add"></i></a></li>
+          <li><a href="javascript:;"><i class="icon-heart"></i></a></li>
         </ul>
       </div>
     </div>
@@ -52,19 +88,6 @@ const {product} = props;
 <script lang="ts">
 export default {
   methods: {
-    addToCart(product: any) {
-      console.log(product)
-    },
-    getImgSrc(product: any): any {
-      const prod_imgs = product['product_images']['images'];
-      const first_img = prod_imgs[0]
-      return `https://down-vn.img.susercontent.com/file/${first_img}`
-    },
-    getProductPrice(product: any): string {
-      return (product.item.price / 100000)
-          .toLocaleString('it-IT', {style: 'currency', currency: 'VND'})
-          .replace('VND', '');
-    },
     getShopeeLink(product: any): string {
       return `https://shopee.vn/product/${product.item.shop_id}/${product.item.item_id}`;
     },
