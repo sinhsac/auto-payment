@@ -75,12 +75,6 @@ const addToCart = (product: any) => {
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus blandit massa enim. Nullam
           id varius nunc id varius nunc.</p>
       </div>
-      <div class="pr_switch_wrap">
-        <div class="product_color_switch">
-          <span class="active" data-color="#090909"></span>
-          <span data-color="#AC644D"></span>
-        </div>
-      </div>
     </div>
   </div>
 </template>

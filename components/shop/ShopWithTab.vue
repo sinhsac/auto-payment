@@ -21,7 +21,7 @@ const debug = ref(route.query.debug ? route.query.debug : '')
           <div class="tab-content">
             <div class="tab-pane fade show active" id="arrival" role="tabpanel" aria-labelledby="arrival-tab">
               <div class="row shop_container">
-                <div v-for="p in data.products" :key="p.item.item_id" class="col-lg-2 col-md-3 col-6">
+                <div v-for="p in data.products" :key="p.item.item_id" class="col-lg-2 col-md-3 col-sm-6 col-xs-6 col-6">
                   <ProductItem :product="p" />
                 </div>
               </div>
