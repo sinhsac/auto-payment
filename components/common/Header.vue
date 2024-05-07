@@ -2,6 +2,7 @@
 
 import ShoppingCart from "~/components/common/ShoppingCart.vue";
 
+
 </script>
 
 <template>
@@ -51,9 +52,9 @@ import ShoppingCart from "~/components/common/ShoppingCart.vue";
           </button>
           <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
             <ul class="navbar-nav">
-              <li><a class="nav-link nav_item" href="/">Trang chủ</a></li>
+              <li><a class="nav-link nav_item" @click="goToShop()" href="javascript:;">Trang chủ</a></li>
               <li><a class="nav-link nav_item" href="/">Giới thiệu</a></li>
-              <li><a class="nav-link nav_item" href="/">Sản phẩm</a></li>
+              <li><a class="nav-link nav_item" @click="goToShop()" href="javascript:;">Sản phẩm</a></li>
               <li><a class="nav-link nav_item" href="/lien-he">Liên hệ</a></li>
             </ul>
           </div>

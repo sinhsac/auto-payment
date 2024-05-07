@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import Checkout from "~/components/shop/Checkout.vue";
+
 const route = useRoute()
-import {Product} from "#components";
+const pInfo = pageInfo()
 
 const {data} = await useFetch('/api/products')
 
@@ -10,7 +12,8 @@ const debug = ref(route.query.debug ? route.query.debug : '')
 
 <template>
   <div>
-    <ShopWithTab />
+    <Checkout v-if="pInfo.pageType == 'Checkout'"/>
+    <ShopWithTab v-if="pInfo.pageType == 'Home'"/>
   </div>
 
 </template>

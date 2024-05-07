@@ -1,11 +1,5 @@
 <script setup lang="ts">
-
 const items = cartItems();
-
-const formatToMoney = (num: any) => {
-  return num.toLocaleString('it-IT', {style: 'currency', currency: 'VND'})
-            .replace('VND', '');
-}
 
 const removeItem = (prod: any) => {
   let item = items.value.find(p => p.id == prod.id);
@@ -44,8 +38,9 @@ const summary = computed(() => {
         </ul>
         <div class="cart_footer">
           <p class="cart_total"><strong>Tổng tiền:</strong> {{ summary.total }} <span class="cart_price"> <span class="price_symbole">đ</span></span></p>
-          <p class="cart_buttons"><a href="#" class="btn btn-fill-line rounded-0 view-cart">Giỏ hàng</a><a
-              href="#" class="btn btn-fill-out rounded-0 checkout">Thanh toán</a></p>
+          <p class="cart_buttons">
+            <a href="#" class="btn btn-fill-line rounded-0 view-cart">Giỏ hàng</a>
+            <a href="#" @click="goToCheckout()" class="btn btn-fill-out rounded-0 checkout">Thanh toán</a></p>
         </div>
       </div>
     </li>

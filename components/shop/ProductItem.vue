@@ -42,8 +42,6 @@ const addToCart = (product: any) => {
   } else {
     item.qty = item.qty + 1
   }
-
-  console.log(item)
 }
 
 
