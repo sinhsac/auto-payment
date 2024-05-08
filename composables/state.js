@@ -1,6 +1,11 @@
 export const cartItems = () => useState('shopping-cart',() => []);
 export const pageInfo = () => useState('pageType', () => {
-    return {pageType: 'Home'};
+    return {
+        pageType: 'Home',
+        curCategory: '101935',
+        lastId: '',
+        category: {}
+    };
 });
 export const goToShop = () => {
     pageInfo().value.pageType = 'Home'

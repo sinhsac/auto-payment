@@ -1,12 +1,7 @@
 <script setup lang="ts">
 import Checkout from "~/components/shop/Checkout.vue";
 
-const route = useRoute()
 const pInfo = pageInfo()
-
-const {data} = await useFetch('/api/products')
-
-const debug = ref(route.query.debug ? route.query.debug : '')
 
 </script>
 

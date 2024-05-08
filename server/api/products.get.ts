@@ -2,15 +2,20 @@ export default defineEventHandler(async (event) => {
     const query = getQuery(event)
     const config = useRuntimeConfig(event)
     //"aggs": { "distinct_values": { "terms": { "field": "item.item_id" } } },
+    console.log("category :: ", query)
     let json = {
         "query": {
             "match": {
-                "item.categories.catid": 101935
+                "item.categories.catid": query.category
             }
         },
         "sort": [ { "item.item_id": "asc" } ],
-        "size": 50
+        "size": 15
     };
+
+    if (query.lastId != undefined && query.lastId != null && query.lastId != '') {
+        json.search_after = [ query.lastId ];
+    }
 
     let data = await $fetch(`${config.elasticsearchBaseUrl}/detail_by_pc/_search?search_type=query_then_fetch`, {
         method: 'POST',
@@ -21,6 +26,14 @@ export default defineEventHandler(async (event) => {
         body: JSON.stringify(json)
     })
     let products = [];
+
+    if (data['hits'] == undefined || data['hits']['hits'] == undefined) {
+        return {
+            lastId: null,
+            products: [],
+        }
+    }
+
     data = data['hits']['hits'];
     let lastId = null;
     let items = [];

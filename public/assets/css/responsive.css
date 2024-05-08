@@ -1835,11 +1835,11 @@ footer .widget_title,
 .tab-style3 .nav-tabs {
 	display: block;
 }
-.shop_container .col-6 {
-	max-width: 100%;
-	-ms-flex: 0 0 100%;
-	flex: 0 0 100%;
-}
+/*.shop_container .col-6 {*/
+/*	max-width: 100%;*/
+/*	-ms-flex: 0 0 100%;*/
+/*	flex: 0 0 100%;*/
+/*}*/
 .mfp-ajax-holder .mfp-content .ajax_quick_view {
 	padding: 30px 15px 15px;
 }
