@@ -823,26 +823,6 @@ PAGE JS
 		}
 	});
 	
-	/*===================================*
-	25. Cart Page Payment option
-	*===================================*/	
-	$(document).ready(function () {
-		$('[name="payment_option"]').on('change', function() {
-			var $value = $(this).attr('value');
-			$('.payment-text').slideUp();
-			$('[data-method="'+$value+'"]').slideDown();
-		});
-	});
-	
-	/*===================================*
-	26. ONLOAD POPUP JS
-	*===================================*/
-	
-	$(window).on('load',function(){
-		setTimeout(function() {
-			$("#onload-popup").modal('show', {}, 500);
-		}, 3000);
-		
-	});	
+
 
 })(jQuery);

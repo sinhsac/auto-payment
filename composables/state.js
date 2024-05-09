@@ -23,3 +23,7 @@ export const formatToMoney = (num) => {
     return num.toLocaleString('it-IT', {style: 'currency', currency: 'VND'})
         .replace('VND', '');
 };
+
+export const generate_order_no = () => {
+    return (Math.floor(100000 + Math.random() * 900000)).toString()
+}

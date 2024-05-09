@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const route = useRoute()
+
 import ProductItem from "~/components/shop/ProductItem.vue";
 
 const debug = ref(route.query.debug ? route.query.debug : '')
@@ -30,7 +31,7 @@ const loadMoreProduct = async () => {
       <div class="row justify-content-center">
         <div class="col-md-6">
           <div class="heading_s1 text-center">
-            <h2>Ổ cứng</h2>
+            <h2>{{ category.display_name }}</h2>
           </div>
         </div>
       </div>

@@ -1,6 +1,9 @@
 <script setup lang="ts">
 
 const items = cartItems();
+const paymentInfo = useCookie('payment',  {
+  default: () => ({ orderNo: generate_order_no() })
+});
 const isCartEmpty = () => {
   return items.value.length == 0;
 }
@@ -18,9 +21,20 @@ const summary = computed(() => {
   };
 })
 
+const changePaymentMethod = (item: any) => {
+  data.paymentMethod = item.type
+  console.log(data.paymentMethod)
+}
+
 const data = {
-  userName: '',
-  address: '',
+  order: { userName: '', address: '', phone: '', email: '' },
+  paymentMethod: 'qr',
+  paymentMethods: [
+    { type: 'qr', name: 'QR Code', desc: 'Thanh toán trực tiếp bằng QR Code' },
+    { type: 'ck', name: 'Chuyển khoản', desc: 'Chuyển khoản tới số tài khoản 123456, sau đó nhắn tin cho chúng tôi qua SDT 09888888888'
+    },
+    { type: 'cod', name: 'COD', desc: 'Đặt hàng và trả tiền khi nhận hàng' }
+  ]
 };
 
 </script>
@@ -40,47 +54,27 @@ const data = {
           </div>
           <form method="post">
             <div class="form-group mb-3">
-              <input type="text" required class="form-control" v-model="data.userName" name="fullName" placeholder="Họ tên">
+              <input type="text" required class="form-control" v-model="data.order.userName"
+                     name="fullName" placeholder="Họ tên">
             </div>
             <div class="form-group mb-3">
-              <input type="text" class="form-control" name="address" v-model="data.address" required="" placeholder="Địa chỉ">
+              <input type="text" class="form-control"
+                     name="address" v-model="data.order.address" required="" placeholder="Địa chỉ">
             </div>
             <div class="form-group mb-3">
-              <input class="form-control" required type="tel" name="phone" placeholder="Số điện thoại">
+              <input class="form-control" required type="tel" v-model="data.order.phone"
+                     name="phone" placeholder="Số điện thoại">
             </div>
             <div class="form-group mb-3">
-              <input class="form-control" required type="email" name="email" placeholder="Địa chỉ email">
-            </div>
-            <div class="ship_detail">
-              <div class="form-group mb-3">
-                <div class="chek-form">
-                  <div class="custome-checkbox">
-                    <input class="form-check-input" type="checkbox" name="checkbox" id="differentaddress">
-                    <label class="form-check-label label_info" for="differentaddress"><span>Địa chỉ nhận là địa chỉ mua hàng?</span></label>
-                  </div>
-                </div>
-              </div>
-              <div class="different_address">
-                <div class="form-group mb-3">
-                  <input type="text" required class="form-control" name="fullName" placeholder="Họ tên">
-                </div>
-                <div class="form-group mb-3">
-                  <input type="text" class="form-control" name="address" required="" placeholder="Địa chỉ">
-                </div>
-                <div class="form-group mb-3">
-                  <input class="form-control" required type="tel" name="phone" placeholder="Số điện thoại">
-                </div>
-                <div class="form-group mb-3">
-                  <input class="form-control" required type="email" name="email" placeholder="Địa chỉ email">
-                </div>
-              </div>
+              <input class="form-control" required type="email" v-model="data.order.email"
+                     name="email" placeholder="Địa chỉ email">
             </div>
           </form>
         </div>
         <div class="col-md-6">
           <div class="order_review">
             <div class="heading_s1">
-              <h4>Thông tin đặt hàng</h4>
+              <h4>Chi tiết đơn #{{paymentInfo.orderNo}}</h4>
             </div>
             <div class="table-responsive order_table">
               <table class="table">
@@ -117,24 +111,14 @@ const data = {
                 <h4>Phương thức thanh toán</h4>
               </div>
               <div class="payment_option">
-                <div class="custome-radio">
-                  <input class="form-check-input" type="radio" name="payment_option" id="exampleRadios5" value="option5" checked="">
-                  <label class="form-check-label" for="exampleRadios5">QR Code</label>
-                  <p data-method="option5" class="payment-text" style="display: block">
-                    Thanh toán trực tiếp
-                  </p>
-                </div>
-                <div class="custome-radio">
-                  <input class="form-check-input" required="" type="radio" name="payment_option" id="exampleRadios3" value="option3" >
-                  <label class="form-check-label" for="exampleRadios3">Chuyển khoản</label>
-                  <p data-method="option3" class="payment-text">
-                    Chuyển khoản tới số tài khoản 123456, sau đó nhắn tin cho chúng tôi qua SDT 09888888888
-                  </p>
-                </div>
-                <div class="custome-radio">
-                  <input class="form-check-input" type="radio" name="payment_option" id="exampleRadios4" value="option4">
-                  <label class="form-check-label" for="exampleRadios4">COD</label>
-                  <p data-method="option4" class="payment-text">Đặt hàng và trả tiền khi nhận hàng</p>
+                <div class="custome-radio" v-for="(item, idx) in data.paymentMethods"
+                     :key="idx" >
+                  <input class="form-check-input" type="radio" name="payment_option"
+                         :id="'pay_' + idx"
+                         @change="changePaymentMethod(item)"
+                         :value="item.type" :checked="item.type == data.paymentMethod" />
+                  <label class="form-check-label" :for="'pay_' + idx">{{ item.name }}</label>
+                  <p class="payment-text" style="display: block"> {{ item.desc }} </p>
                 </div>
               </div>
             </div>
@@ -146,10 +130,3 @@ const data = {
   </div>
 </template>
 
-<script>
-
-</script>
-
-<style scoped>
-
-</style>
