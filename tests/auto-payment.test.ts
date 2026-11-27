@@ -154,7 +154,34 @@ test('OrderStore end-to-end: partial payment, full payment, idempotency, SSE, an
     const reloaded = new OrderStore({ dataDir: tmpDir })
     const persisted = reloaded.getOrder('AP123456')
     assert.equal(persisted?.status, 'PAID')
+    assert.equal(persisted?.paymentSource, 'WEBHOOK')
     assert.equal(persisted?.payments.length, 2)
+
+    // 6. Staff manual confirmation fallback + delayed Android webhook reconciliation (no double count!)
+    reloaded.createOrder({
+      orderCode: 'AP654321',
+      paymentMethod: 'qr',
+      customer: { userName: 'Staff Fallback', address: 'HN', phone: '0911222333', email: '' },
+      items: [{ id: 2, title: 'Mouse', price: 150000, qty: 1 }],
+      expiryMinutes: 15,
+    })
+    const staffPaid = reloaded.markPaidManually('AP654321', 'Đã kiểm tra sao kê VCB', 'Thu ngân Lan')
+    assert.equal(staffPaid?.status, 'PAID')
+    assert.equal(staffPaid?.paymentSource, 'STAFF')
+    assert.equal(staffPaid?.confirmedByStaff?.staffName, 'Thu ngân Lan')
+    assert.equal(staffPaid?.paidAmount, 150000)
+
+    // Delayed webhook arrives after phone reconnects -> archived cleanly without double-counting
+    const delayed = reloaded.processBankTransfer(
+      parseBankNotification({
+        strPostTime: '2026-11-27 18:00:00',
+        pck: 'com.VCB',
+        msg: 'SD TK 0123456789 +150,000VND ND: AP654321',
+      })
+    )
+    assert.equal(delayed.log.outcome, 'ALREADY_PAID')
+    assert.equal(reloaded.getOrder('AP654321')?.paidAmount, 150000)
+    assert.equal(reloaded.getOrder('AP654321')?.payments.length, 2)
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true })
   }

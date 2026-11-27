@@ -19,13 +19,15 @@ export default defineEventHandler(async (event) => {
     return { order }
   }
 
-  if (action === 'mark_paid') {
-    const order = store.markPaidManually(code, body?.note ? String(body.note) : undefined)
+  if (action === 'mark_paid' || action === 'confirm_by_staff') {
+    const staffName = body?.staffName ? String(body.staffName) : 'Nhân viên'
+    const note = body?.note ? String(body.note) : 'Xác nhận thủ công bởi nhân viên'
+    const order = store.markPaidManually(code, note, staffName)
     if (!order) {
       throw createError({ statusCode: 404, statusMessage: `Order ${code} not found` })
     }
     return { order }
   }
 
-  throw createError({ statusCode: 400, statusMessage: 'Invalid action. Supported: cancel, mark_paid' })
+  throw createError({ statusCode: 400, statusMessage: 'Invalid action. Supported: cancel, confirm_by_staff, mark_paid' })
 })

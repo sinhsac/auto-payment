@@ -29,12 +29,22 @@ export interface PaymentRecord {
   bankName: string
   rawMessage: string
   receivedAt: string
+  source?: 'WEBHOOK' | 'STAFF'
+  confirmedBy?: string
+}
+
+export interface StaffConfirmationInfo {
+  staffName: string
+  note: string
+  confirmedAt: string
 }
 
 export interface OrderRecord {
   orderCode: string
   paymentMethod: PaymentMethod
   status: OrderStatus
+  paymentSource: 'WEBHOOK' | 'STAFF' | 'COD' | null
+  confirmedByStaff?: StaffConfirmationInfo | null
   customer: CustomerInfo
   items: OrderItem[]
   subtotal: number
@@ -158,6 +168,8 @@ export class OrderStore {
       orderCode: input.orderCode.toUpperCase(),
       paymentMethod: input.paymentMethod,
       status: isCod ? 'CONFIRMED_COD' : 'PENDING',
+      paymentSource: isCod ? 'COD' : null,
+      confirmedByStaff: null,
       customer: {
         userName: input.customer.userName.trim(),
         address: input.customer.address.trim(),
@@ -238,6 +250,7 @@ export class OrderStore {
     return {
       totalOrders: all.length,
       paidOrders: all.filter((o) => o.status === 'PAID').length,
+      staffConfirmedOrders: all.filter((o) => o.status === 'PAID' && o.paymentSource === 'STAFF').length,
       pendingOrders: all.filter((o) => o.status === 'PENDING' || o.status === 'UNDERPAID').length,
       codOrders: all.filter((o) => o.status === 'CONFIRMED_COD').length,
       totalRevenuePaid: all.filter((o) => o.status === 'PAID').reduce((s, o) => s + o.paidAmount, 0),
@@ -260,7 +273,11 @@ export class OrderStore {
     return order
   }
 
-  public markPaidManually(orderCode: string, note = 'Manual admin confirmation'): OrderRecord | null {
+  public markPaidManually(
+    orderCode: string,
+    note = 'Xác nhận thủ công bởi nhân viên',
+    staffName = 'Nhân viên'
+  ): OrderRecord | null {
     const order = this.getOrder(orderCode)
     if (!order) {
       return null
@@ -268,17 +285,27 @@ export class OrderStore {
     if (order.status === 'PAID') {
       return order
     }
+    const cleanStaff = staffName.trim() || 'Nhân viên'
+    const cleanNote = note.trim() || 'Xác nhận thủ công khi app Android gặp sự cố'
     const remaining = Math.max(0, order.totalAmount - order.paidAmount)
     const nowIso = new Date().toISOString()
     order.payments.push({
-      fingerprint: `manual-${Date.now()}`,
+      fingerprint: `staff-${Date.now()}`,
       amount: remaining,
-      bankName: 'Manual Admin',
-      rawMessage: note,
+      bankName: `Nhân viên: ${cleanStaff}`,
+      rawMessage: cleanNote,
       receivedAt: nowIso,
+      source: 'STAFF',
+      confirmedBy: cleanStaff,
     })
     order.paidAmount += remaining
     order.status = 'PAID'
+    order.paymentSource = 'STAFF'
+    order.confirmedByStaff = {
+      staffName: cleanStaff,
+      note: cleanNote,
+      confirmedAt: nowIso,
+    }
     order.paidAt = nowIso
     order.updatedAt = nowIso
     this.saveToDisk()
@@ -351,10 +378,23 @@ export class OrderStore {
     }
 
     if (order.status === 'PAID') {
+      // Archive delayed bank notification for audit/reconciliation without double-counting revenue
+      order.payments.push({
+        fingerprint: parsed.transactionFingerprint,
+        amount: parsed.amount,
+        bankName: parsed.bankName,
+        rawMessage: `[Đối soát bổ sung] ${parsed.rawMessage}`,
+        receivedAt: nowIso,
+        source: 'WEBHOOK',
+      })
+      order.updatedAt = nowIso
+      const detail = order.paymentSource === 'STAFF'
+        ? `Order ${order.orderCode} already confirmed by staff (${order.confirmedByStaff?.staffName || 'Staff'}); bank notification archived`
+        : `Order ${order.orderCode} was already paid`
       const log: WebhookLogRecord = {
         ...baseLog,
         outcome: 'ALREADY_PAID',
-        detail: `Order ${order.orderCode} was already paid`,
+        detail,
       }
       this.appendWebhookLog(log)
       return { log, order }
@@ -367,6 +407,7 @@ export class OrderStore {
       bankName: parsed.bankName,
       rawMessage: parsed.rawMessage,
       receivedAt: nowIso,
+      source: 'WEBHOOK',
     })
     order.paidAmount += parsed.amount
     order.updatedAt = nowIso
@@ -374,6 +415,7 @@ export class OrderStore {
     let log: WebhookLogRecord
     if (order.paidAmount >= order.totalAmount) {
       order.status = 'PAID'
+      order.paymentSource = 'WEBHOOK'
       order.paidAt = nowIso
       log = {
         ...baseLog,

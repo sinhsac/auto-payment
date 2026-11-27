@@ -42,7 +42,8 @@ A self-hosted, zero-fee automated bank transfer payment system built with **Nuxt
 | `GET` | `/api/orders` | Lists orders (`?status=`, `?q=`) and summary KPI stats for `/admin`. |
 | `GET` | `/api/orders/:code` | Retrieves live order details (auto-expires unpaid QR orders past deadline). |
 | `GET` | `/api/orders/:code/stream` | Server-Sent Events (SSE) real-time stream for order payment updates. |
-| `POST` | `/api/orders/:code/action` | Performs admin/customer actions (`{ "action": "mark_paid" | "cancel" }`). |
+| `POST` | `/api/orders/:code/action` | Staff manual confirmation fallback (`{ "action": "confirm_by_staff", "staffName": "...", "note": "..." }`) or cancel (`{ "action": "cancel" }`). |
+| `GET` | `/api/health` | Health-check endpoint for server monitoring and Android connectivity checks. |
 | `POST` | `/api/webhooks/bank-notify` | Receives bank credit notifications (`auto-payment-android` `XInfo` or generic JSON) and auto-matches orders. |
 | `GET` | `/api/webhooks/logs` | Returns recent bank webhook audit logs and matching outcomes. |
 

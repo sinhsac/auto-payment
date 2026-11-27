@@ -51,6 +51,15 @@ const continueShopping = () => {
                 <div class="col-sm-6"><b>Tổng đơn:</b> <span class="fw-bold text-danger">{{ formatToMoney(activeOrder.totalAmount) }} ₫</span></div>
                 <div class="col-sm-6"><b>Đã thanh toán:</b> <span class="fw-bold text-success">{{ formatToMoney(activeOrder.paidAmount) }} ₫</span></div>
                 <div v-if="activeOrder.paidAt" class="col-12"><b>Thời gian xác nhận:</b> {{ formatDateTime(activeOrder.paidAt) }}</div>
+                <div v-if="activeOrder.paymentSource === 'STAFF'" class="col-12">
+                  <b>Nguồn xác nhận:</b>
+                  <span class="badge bg-primary ms-1">Nhân viên: {{ activeOrder.confirmedByStaff?.staffName || 'Nhân viên' }}</span>
+                  <span v-if="activeOrder.confirmedByStaff?.note" class="text-muted ms-1">({{ activeOrder.confirmedByStaff.note }})</span>
+                </div>
+                <div v-else-if="activeOrder.paymentSource === 'WEBHOOK'" class="col-12">
+                  <b>Nguồn xác nhận:</b>
+                  <span class="badge bg-success ms-1">Tự động qua Auto Payment Android</span>
+                </div>
               </div>
 
               <div v-if="activeOrder.items?.length" class="mt-3">

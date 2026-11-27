@@ -4,6 +4,13 @@ const searchQ = ref('')
 const sendingWebhook = ref(false)
 const webhookResult = ref<any>(null)
 
+// Staff manual confirmation modal state (fallback when Android app is offline)
+const staffModalOrder = ref<any>(null)
+const staffNameInput = ref('')
+const staffNoteInput = ref('')
+const staffConfirming = ref(false)
+const staffError = ref('')
+
 const simForm = reactive({
   pck: 'com.VCB',
   title: 'Vietcombank',
@@ -72,6 +79,39 @@ const sendSimulatedWebhook = async () => {
     webhookResult.value = { ok: false, detail: err?.data?.statusMessage || err?.message || 'Error' }
   } finally {
     sendingWebhook.value = false
+  }
+}
+
+const openStaffConfirmModal = (order: any) => {
+  staffModalOrder.value = order
+  staffNameInput.value = ''
+  staffNoteInput.value = `Xác nhận thủ công đơn ${order.orderCode} (đã kiểm tra sao kê ngân hàng)`
+  staffError.value = ''
+}
+
+const submitStaffConfirm = async () => {
+  if (!staffModalOrder.value) return
+  if (!staffNameInput.value.trim()) {
+    staffError.value = 'Vui lòng nhập tên nhân viên xác nhận.'
+    return
+  }
+  staffConfirming.value = true
+  staffError.value = ''
+  try {
+    await $fetch(`/api/orders/${staffModalOrder.value.orderCode}/action`, {
+      method: 'POST',
+      body: {
+        action: 'confirm_by_staff',
+        staffName: staffNameInput.value.trim(),
+        note: staffNoteInput.value.trim(),
+      },
+    })
+    staffModalOrder.value = null
+    await refreshAll()
+  } catch (err: any) {
+    staffError.value = err?.data?.statusMessage || err?.message || 'Lỗi xác nhận đơn hàng'
+  } finally {
+    staffConfirming.value = false
   }
 }
 
@@ -188,7 +228,15 @@ const badgeClass = (status: string) => {
                   <span class="fw-semibold text-success">{{ formatToMoney(order.paidAmount) }}</span> /
                   <span class="fw-bold">{{ formatToMoney(order.totalAmount) }} ₫</span>
                 </td>
-                <td><span class="badge" :class="badgeClass(order.status)">{{ order.status }}</span></td>
+                <td>
+                  <span class="badge" :class="badgeClass(order.status)">{{ order.status }}</span>
+                  <div v-if="order.paymentSource === 'STAFF'" class="text-primary mt-1" style="font-size: 0.72rem;">
+                    👤 NV: {{ order.confirmedByStaff?.staffName || 'Nhân viên' }}
+                  </div>
+                  <div v-else-if="order.paymentSource === 'WEBHOOK'" class="text-success mt-1" style="font-size: 0.72rem;">
+                    ⚡ Tự động (App)
+                  </div>
+                </td>
                 <td>{{ formatDateTime(order.createdAt) }}</td>
                 <td class="text-end">
                   <div class="btn-group btn-group-sm">
@@ -202,11 +250,12 @@ const badgeClass = (status: string) => {
                       Test QR
                     </button>
                     <button
-                      v-if="order.status !== 'PAID'"
-                      class="btn btn-outline-success"
-                      @click="runOrderAction(order.orderCode, 'mark_paid')"
+                      v-if="order.status !== 'PAID' && order.status !== 'CANCELLED'"
+                      class="btn btn-success"
+                      title="Xác nhận thủ công bởi nhân viên nếu app Android gặp sự cố"
+                      @click="openStaffConfirmModal(order)"
                     >
-                      Duyệt
+                      NV xác nhận
                     </button>
                     <button
                       v-if="order.status === 'PENDING' || order.status === 'UNDERPAID'"
@@ -311,6 +360,44 @@ const badgeClass = (status: string) => {
                 </tbody>
               </table>
             </div>
+          </div>
+        </div>
+      </div>
+      <!-- Staff manual confirmation modal -->
+      <div
+        v-if="staffModalOrder"
+        class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+        style="background: rgba(15, 23, 42, 0.55); z-index: 2000;"
+      >
+        <div class="card border-0 shadow-lg p-4" style="max-width: 480px; width: 92%;">
+          <h5 class="fw-bold mb-1">Xác nhận thanh toán bởi nhân viên</h5>
+          <p class="small text-muted mb-3">
+            Dùng khi ứng dụng Android bị mất mạng hoặc chưa kịp đồng bộ. Màn hình khách hàng đang mở đơn
+            <code>{{ staffModalOrder.orderCode }}</code> sẽ tự động chuyển sang hoàn tất ngay lập tức.
+          </p>
+
+          <div class="alert alert-light border small py-2 mb-3">
+            <div><b>Đơn hàng:</b> <code>{{ staffModalOrder.orderCode }}</code> ({{ staffModalOrder.customer.userName }})</div>
+            <div><b>Cần thanh toán:</b> <span class="text-danger fw-bold">{{ formatToMoney(staffModalOrder.totalAmount - (staffModalOrder.paidAmount || 0)) }} ₫</span></div>
+          </div>
+
+          <div v-if="staffError" class="alert alert-danger py-2 small">{{ staffError }}</div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Tên nhân viên xác nhận <span class="text-danger">*</span></label>
+            <input v-model="staffNameInput" type="text" class="form-control form-control-sm" placeholder="VD: Nguyễn Minh Anh (Thu ngân)" />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Ghi chú / Mã giao dịch đối soát</label>
+            <textarea v-model="staffNoteInput" rows="2" class="form-control form-control-sm"></textarea>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2">
+            <button class="btn btn-outline-secondary btn-sm" :disabled="staffConfirming" @click="staffModalOrder = null">Đóng</button>
+            <button class="btn btn-success btn-sm fw-semibold" :disabled="staffConfirming" @click="submitStaffConfirm">
+              {{ staffConfirming ? 'Đang xác nhận...' : 'Xác nhận đã nhận tiền' }}
+            </button>
           </div>
         </div>
       </div>
