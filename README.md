@@ -1,134 +1,124 @@
 # Auto Payment
 
+[![CI](https://github.com/sinhsac/auto-payment/actions/workflows/ci.yml/badge.svg)](https://github.com/sinhsac/auto-payment/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Nuxt 4](https://img.shields.io/badge/Nuxt-4.7-00DC82?logo=nuxt.js&logoColor=white)](https://nuxt.com/)
 [![Vue 3](https://img.shields.io/badge/Vue-3.5-4FC08D?logo=vue.js&logoColor=white)](https://vuejs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Elasticsearch](https://img.shields.io/badge/Elasticsearch-Search_Backend-005571?logo=elasticsearch&logoColor=white)](https://www.elastic.co/)
+[![Node.js](https://img.shields.io/badge/Node.js-22%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 
-An automated payment and e-commerce storefront demo built with **Nuxt**, **Vue 3**, **Nitro server routes**, and **Elasticsearch**. It provides a responsive product catalog with cursor-based pagination, a client-side shopping cart with VND currency formatting, and a multi-step checkout flow supporting QR Code, bank transfer, and Cash on Delivery (COD) payment methods.
+An end-to-end automated **VietQR (NAPAS 247 / EMVCo)** e-commerce storefront and real-time bank transfer verification platform built with **Nuxt 4**, **Vue 3**, and **Nitro Server Routes**.
 
-> **Legacy Archive**: The original Nuxt 3.11 / Vue 3.4 release is archived under tag/release [`v0.1.0-legacy`](https://github.com/sinhsac/auto-payment/releases/tag/v0.1.0-legacy).
+Designed to work out of the box with zero external database setup, while integrating directly with the companion **[auto-payment-android](https://github.com/sinhsac/auto-payment-android)** notification listener app (or any bank webhook) to automatically confirm customer orders in real time via **Server-Sent Events (SSE)**.
+
+> **Legacy Archive**: The original Nuxt 3.11 / Vue 3.4 snapshot is archived under release [`v0.1.0-legacy`](https://github.com/sinhsac/auto-payment/releases/tag/v0.1.0-legacy).
 
 ## Key Features
 
-- **Elasticsearch-Backed Product Catalog**: Queries indexed products (`detail_by_pc`) and categories (`shopee_categories`) via Nuxt Nitro server endpoints with `search_after` pagination and item deduplication.
-- **Interactive Shopping Cart**: Reactive cart state powered by Nuxt `useState` (`composables/state.js`) with live item counts, removal controls, VND subtotal formatting, and cookie-persisted 6-digit order numbers.
-- **Multi-Step Checkout Flow**: Seamless client-side transitions across catalog browsing (`ShopWithTab`), billing details & payment selection (`Checkout`), order payment prompt (`PlaceOrder`), and confirmation (`OrderCompleted`).
-- **Multiple Payment Options**: Built-in checkout selection for **QR Code**, **Bank Transfer**, and **COD** payment workflows (with `qrcode` included for QR payment integration).
-- **Production-Ready Deployment**: Includes PM2 cluster configuration (`ecosystem.config.cjs`) and Nuxt Nitro server build scripts.
-
-## Tech Stack
-
-- **Framework**: [Nuxt 4](https://nuxt.com/) (`^4.7.0`) & [Vue 3](https://vuejs.org/) (`^3.5.46`)
-- **Modules & Libraries**: `vue-router`, `vuex`, `qrcode`
-- **Search & Data Store**: Elasticsearch REST API (via Nitro `$fetch` and `runtimeConfig`)
-- **UI Assets**: Bootstrap, Owl Carousel, Slick, jQuery, and icon fonts in `public/assets/`
-- **Process Management**: PM2 (`ecosystem.config.cjs`)
-
-## Project Structure
-
-```text
-auto-payment/
-├── app.vue                        # Root app layout, SEO metadata, and asset head links
-├── nuxt.config.ts                 # Nuxt 3 config & Elasticsearch runtimeConfig
-├── local.env                      # Environment variable template for Elasticsearch
-├── ecosystem.config.cjs           # PM2 cluster deployment configuration
-├── runserver.sh                   # Build & server startup helper script
-├── composables/
-│   └── state.js                   # Shared cart, navigation state, VND formatting & order ID generator
-├── layouts/
-│   └── default.vue                # Shared header and footer page layout
-├── pages/
-│   ├── index.vue                  # Main storefront & checkout view switcher
-│   └── lien-he/index.vue          # Contact page route
-├── components/
-│   ├── common/                    # Header, Footer, ShoppingCart dropdown, Popup modal
-│   └── shop/                      # ShopWithTab, ProductItem, Checkout, PlaceOrder, OrderCompleted
-├── server/
-│   ├── api/
-│   │   ├── products.get.ts        # GET /api/products?category=&lastId= (paginated ES product search)
-│   │   ├── categories.get.ts      # GET /api/categories (list categories from ES)
-│   │   ├── categories/[id].get.ts # GET /api/categories/:id (category lookup by catid)
-│   │   └── hello.get.ts           # GET /api/hello (batch category extraction into ES)
-│   ├── middleware/                # Request logging (log.ts) and context auth stub (auth.ts)
-│   └── utils/handler.ts           # Reusable H3 response wrapper helper
-└── public/assets/                 # Static CSS, JS, fonts, and storefront template images
-```
+- **Real EMVCo / VietQR Generator (`server/utils/vietqr.ts`)**: Generates standards-compliant NAPAS 247 dynamic QR codes (with exact VND amount, bank BIN, account number, order reference code, and CRC-16/CCITT-FALSE checksum) locally using `qrcode` — scannable by all major Vietnamese banking apps.
+- **Automated Bank Notification Webhook (`POST /api/webhooks/bank-notify`)**:
+  - 100% compatible with **`auto-payment-android`**'s `XInfo` JSON payload (`groupKey`, `postTime`, `strPostTime`, `title`, `msg`, `pck`) as well as generic `{ amount, content, transactionId, bank }` webhooks.
+  - Parses incoming credit alerts from **Vietcombank, Techcombank, MBBank, VPBank, BIDV, ACB, TPBank, VietinBank, Sacombank, Timo, MoMo, and ZaloPay**.
+  - Rejects outgoing debits (`-150,000VND`, debit keywords), deduplicates repeated notifications idempotently, and cleanly tracks partial payments (`UNDERPAID`) until the full balance is received (`PAID`).
+  - Optional constant-time secret verification via `X-Webhook-Secret` or `Authorization: Bearer <secret>`.
+- **Real-Time Order Confirmation (SSE)**: `GET /api/orders/:code/stream` pushes live status transitions immediately to the customer's checkout screen (with countdown timer and automatic polling fallback).
+- **Zero-Config Storefront & Optional Elasticsearch**: Ships with a built-in demo product catalog (12 products across 4 categories) so `npm run dev` works immediately; automatically switches to Elasticsearch when `NUXT_ELASTICSEARCH_BASE_URL` and `NUXT_ELASTICSEARCH_TOKEN` are configured.
+- **Persistent Orders & Admin Dashboard (`/admin`)**:
+  - Atomic JSON persistence (`data/store.json`) with zero database setup.
+  - Live revenue KPIs, filterable order table, manual approve/cancel actions, webhook audit log, and an **interactive `auto-payment-android` webhook simulator**.
+- **Shareable Order Tracking URLs (`/orders/:code`)**: Customers can bookmark or refresh `/orders/AP123456` without losing their QR code or receipt.
 
 ## API Endpoints
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `GET` | `/api/products` | Fetches up to 15 products by `category` ID from the `detail_by_pc` Elasticsearch index; supports cursor pagination via `lastId`. |
-| `GET` | `/api/categories` | Lists up to 50 sorted categories from the `shopee_categories` index (filtering excluded IDs). |
-| `GET` | `/api/categories/:id` | Returns a single category document matching the numeric `catid`. |
-| `GET` | `/api/hello` | Utility handler that scans `detail_by_pc` and indexes distinct categories into `shopee_categories`. |
+| `GET` | `/api/categories` | Lists product categories (Elasticsearch or built-in demo catalog). |
+| `GET` | `/api/categories/:id` | Returns a single category by `catid`. |
+| `GET` | `/api/products` | Lists/filters products by `category`, `q` (search), and `lastId` (ES pagination). |
+| `POST` | `/api/orders` | Creates a new order (`qr`, `bank_transfer`, or `cod`) and generates a dynamic VietQR code. |
+| `GET` | `/api/orders` | Lists orders (`?status=`, `?q=`) and summary KPI stats for `/admin`. |
+| `GET` | `/api/orders/:code` | Retrieves live order details (auto-expires unpaid QR orders past deadline). |
+| `GET` | `/api/orders/:code/stream` | Server-Sent Events (SSE) real-time stream for order payment updates. |
+| `POST` | `/api/orders/:code/action` | Performs admin/customer actions (`{ "action": "mark_paid" | "cancel" }`). |
+| `POST` | `/api/webhooks/bank-notify` | Receives bank credit notifications (`auto-payment-android` `XInfo` or generic JSON) and auto-matches orders. |
+| `GET` | `/api/webhooks/logs` | Returns recent bank webhook audit logs and matching outcomes. |
 
-## Prerequisites
+## Quick Start
 
-- **Node.js** (v22.22.3+ recommended for Nuxt 4)
-- **npm** (or yarn / pnpm / bun)
-- An accessible **Elasticsearch** instance containing the `detail_by_pc` and `shopee_categories` indices
-
-## Getting Started
-
-### 1. Clone and Install Dependencies
+### 1. Install & Run Locally (Zero External Services Needed)
 
 ```bash
 git clone https://github.com/sinhsac/auto-payment.git
 cd auto-payment
 npm install
-```
-
-### 2. Configure Environment Variables
-
-Copy or adapt the settings from `local.env` into `.env` (or export them in your shell):
-
-```env
-NUXT_ELASTICSEARCH_BASE_URL=https://127.0.0.1:9200
-NUXT_ELASTICSEARCH_TOKEN=<your-base64-basic-auth-token>
-NODE_TLS_REJECT_UNAUTHORIZED=0
-```
-
-> **Note**: `NUXT_ELASTICSEARCH_BASE_URL` and `NUXT_ELASTICSEARCH_TOKEN` automatically override `runtimeConfig.elasticsearchBaseUrl` and `runtimeConfig.elasticsearchToken` in `nuxt.config.ts`. Set `NODE_TLS_REJECT_UNAUTHORIZED=0` only in local development with self-signed certificates.
-
-### 3. Run the Development Server
-
-Start the Nuxt development server on `http://localhost:3000`:
-
-```bash
 npm run dev
 ```
 
-You can filter products by category using a query parameter, e.g. `http://localhost:3000/?category=101935`.
+Open **`http://localhost:3000`**:
+1. Add any product to the cart and click **Thanh toán**.
+2. Fill in customer details, choose **VietQR**, and place the order.
+3. On `/orders/APxxxxxx`, scan the generated VietQR code or click **"Giả lập chuyển khoản ĐỦ (Auto-Confirm)"** — the page immediately transitions to **Order Completed** via SSE.
+4. Visit **`http://localhost:3000/admin`** to inspect orders, revenue stats, and webhook logs, or test custom Vietnamese bank notification messages.
 
-## Production & Deployment
+### 2. Configure Your Bank Account & Webhook Secret
 
-Build the production bundle:
+Copy `local.env` to `.env` and update your bank details:
+
+```env
+NUXT_BANK_BIN=970436
+NUXT_BANK_NAME=Vietcombank
+NUXT_BANK_ACCOUNT_NO=0123456789
+NUXT_BANK_ACCOUNT_NAME=YOUR ACCOUNT NAME
+NUXT_ORDER_PREFIX=AP
+NUXT_ORDER_EXPIRY_MINUTES=15
+
+NUXT_PUBLIC_BANK_NAME=Vietcombank
+NUXT_PUBLIC_BANK_ACCOUNT_NO=0123456789
+NUXT_PUBLIC_BANK_ACCOUNT_NAME=YOUR ACCOUNT NAME
+
+# Recommended in production:
+NUXT_WEBHOOK_SECRET=replace-with-a-strong-random-secret
+NUXT_PUBLIC_ENABLE_DEMO_SIMULATOR=false
+```
+
+### 3. Connect `auto-payment-android`
+
+Point `PushingWorker.kt` in [auto-payment-android](https://github.com/sinhsac/auto-payment-android) to:
+
+```text
+POST https://your-domain.com/api/webhooks/bank-notify
+```
+
+Example webhook test with `curl`:
 
 ```bash
+curl -X POST http://localhost:3000/api/webhooks/bank-notify \
+  -H "Content-Type: application/json" \
+  -H "X-Webhook-Secret: your-secret" \
+  -d '{
+    "groupKey": "0|com.VCB|123",
+    "strPostTime": "2026-11-27 17:30:00",
+    "title": "Vietcombank",
+    "msg": "SD TK 0123456789 +150,000VND luc 27/11/2026. ND: AP123456",
+    "pck": "com.VCB"
+  }'
+```
+
+## Testing & Production Deployment
+
+```bash
+# Run automated unit & integration tests (VietQR CRC16, bank parser, OrderStore)
+npm test
+
+# Build production bundle
 npm run build
-```
 
-Preview locally:
-
-```bash
-npm run preview
-```
-
-Run the compiled Nitro server directly with Node.js:
-
-```bash
+# Start production server directly
 node .output/server/index.mjs
-```
 
-Or deploy in cluster mode using PM2 (listens on port `3030` per `ecosystem.config.cjs`):
-
-```bash
+# Or run with PM2 (port 3030)
 pm2 start ecosystem.config.cjs
 ```
 
 ## License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.

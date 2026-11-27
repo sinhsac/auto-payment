@@ -1,55 +1,70 @@
+import { queryDemoProducts } from '~/server/utils/catalog'
+
 export default defineEventHandler(async (event) => {
-    const query = getQuery(event)
-    const config = useRuntimeConfig(event)
-    //"aggs": { "distinct_values": { "terms": { "field": "item.item_id" } } },
-    console.log("category :: ", query)
-    let json = {
-        "query": {
-            "match": {
-                "item.categories.catid": query.category
-            }
-        },
-        "sort": [ { "item.item_id": "asc" } ],
-        "size": 15
-    };
+  const query = getQuery(event)
+  const config = useRuntimeConfig(event)
+  const categoryNum = query.category ? Number.parseInt(String(query.category), 10) : null
+  const searchQ = query.q ? String(query.q) : ''
 
-    if (query.lastId != undefined && query.lastId != null && query.lastId != '') {
-        json.search_after = [ query.lastId ];
-    }
+  if (config.elasticsearchBaseUrl && config.elasticsearchToken && !searchQ) {
+    try {
+      const esQuery: any = {
+        query: categoryNum
+          ? { match: { 'item.categories.catid': categoryNum } }
+          : { match_all: {} },
+        sort: [{ 'item.item_id': 'asc' }],
+        size: 15,
+      }
 
-    let data = await $fetch(`${config.elasticsearchBaseUrl}/detail_by_pc/_search?search_type=query_then_fetch`, {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Basic ${config.elasticsearchToken}`
-        },
-        body: JSON.stringify(json)
-    })
-    let products = [];
+      if (query.lastId !== undefined && query.lastId !== null && query.lastId !== '') {
+        esQuery.search_after = [query.lastId]
+      }
 
-    if (data['hits'] == undefined || data['hits']['hits'] == undefined) {
-        return {
-            lastId: null,
-            products: [],
+      const data: any = await $fetch(
+        `${config.elasticsearchBaseUrl}/detail_by_pc/_search?search_type=query_then_fetch`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Basic ${config.elasticsearchToken}`,
+          },
+          body: JSON.stringify(esQuery),
+          timeout: 3000,
         }
-    }
+      )
 
-    data = data['hits']['hits'];
-    let lastId = null;
-    let items = [];
-    for (const item of data) {
-        let source = item['_source']
-        if (items.indexOf(source['item']['item_id']) >= 0) {
-            continue;
+      const hits = data?.hits?.hits || []
+      const products = []
+      const seen = new Set()
+      let lastId = null
+
+      for (const hit of hits) {
+        const source = hit._source
+        const itemId = source?.item?.item_id
+        if (!source || seen.has(itemId)) {
+          continue
         }
-        items.push(source['item']['item_id']);
-        delete source['item']['label_ids']
-        products.push(source);
-        lastId = source['item']['item_id']
-    }
+        seen.add(itemId)
+        delete source.item.label_ids
+        products.push(source)
+        lastId = itemId
+      }
 
-    return {
-        lastId,
-        products,
+      return { source: 'elasticsearch', lastId, hasMore: hits.length === 15, products }
+    } catch {
+      // Fall back to built-in demo catalog
     }
+  }
+
+  const products = queryDemoProducts({
+    category: Number.isFinite(categoryNum) && categoryNum! > 0 ? categoryNum : null,
+    q: searchQ,
+  })
+
+  return {
+    source: 'demo',
+    lastId: products[products.length - 1]?.item.item_id ?? null,
+    hasMore: false,
+    products,
+  }
 })

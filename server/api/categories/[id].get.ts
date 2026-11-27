@@ -1,31 +1,41 @@
+import { DEMO_CATEGORIES, getDemoCategoryById } from '~/server/utils/catalog'
+
 export default defineEventHandler(async (event) => {
-    const query = getQuery(event)
-    const id = parseInt(event.context.params.id) as number
+  const rawId = getRouterParam(event, 'id')
+  const id = Number.parseInt(String(rawId || ''), 10)
+  const config = useRuntimeConfig(event)
 
-    const config = useRuntimeConfig(event)
-    let json = {
-        "query": {
-            "match": {
-                "catid": id
-            }
-        }
-    };
-
-    let data = await $fetch(`${config.elasticsearchBaseUrl}/shopee_categories/_search`, {
+  if (config.elasticsearchBaseUrl && config.elasticsearchToken && Number.isFinite(id)) {
+    try {
+      const data: any = await $fetch(`${config.elasticsearchBaseUrl}/shopee_categories/_search`, {
         method: 'POST',
         headers: {
-            "Content-Type": "application/json",
-            Authorization: `Basic ${config.elasticsearchToken}`
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${config.elasticsearchToken}`,
         },
-        body: JSON.stringify(json)
-    })
+        body: JSON.stringify({ query: { match: { catid: id } } }),
+        timeout: 3000,
+      })
 
-    if (data['hits'] == undefined
-        || data['hits']['hits'] == undefined
-        || data['hits']['hits'].length == 0
-        || data['hits']['hits'][0]['_source'] == undefined) {
-        return {}
+      const hit = data?.hits?.hits?.[0]?._source
+      if (hit) {
+        return hit
+      }
+    } catch {
+      // Fall back to built-in catalog
     }
+  }
 
-    return data['hits']['hits'][0]['_source']
+  if (Number.isFinite(id)) {
+    const demo = getDemoCategoryById(id)
+    if (demo) {
+      return demo
+    }
+  }
+
+  return {
+    catid: 0,
+    display_name: 'Tất cả sản phẩm',
+    description: DEMO_CATEGORIES.map((c) => c.display_name).join(' • '),
+  }
 })
