@@ -2,8 +2,8 @@
 useHead({
   link: [
     { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-    { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap', crossorigin: '' },
-    { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap', crossorigin: '' },
+    { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+    { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap', crossorigin: '' },
     { rel: 'stylesheet', href: '/assets/css/animate.css', crossorigin: '' },
     { rel: 'stylesheet', href: '/assets/bootstrap/css/bootstrap.min.css', crossorigin: '' },
     { rel: 'stylesheet', href: '/assets/css/all.min.css', crossorigin: '' },
@@ -40,9 +40,22 @@ useSeoMeta({
 </template>
 
 <style>
+:root {
+  --bs-body-font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --bs-font-sans-serif: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --bs-font-monospace: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
 body {
   margin: 0;
   background-color: #f8fafc;
+  font-family: var(--bs-body-font-family);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4, h5, h6, p, a, button, input, select, textarea, .btn, .nav-link, .badge, .card, .table {
+  font-family: var(--bs-body-font-family);
+}
+code, pre, .font-monospace {
+  font-family: var(--bs-font-monospace);
 }
 .header_wrap.fixed-top {
   position: sticky;
