@@ -1,5 +1,3 @@
-import {da} from "cronstrue/dist/i18n/locales/da";
-
 export default defineEventHandler(async (event) => {
     const query = getQuery(event)
 

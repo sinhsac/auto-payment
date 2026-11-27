@@ -1,12 +1,14 @@
 # Auto Payment
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Nuxt 3](https://img.shields.io/badge/Nuxt-3.11-00DC82?logo=nuxt.js&logoColor=white)](https://nuxt.com/)
-[![Vue 3](https://img.shields.io/badge/Vue-3.4-4FC08D?logo=vue.js&logoColor=white)](https://vuejs.org/)
+[![Nuxt 4](https://img.shields.io/badge/Nuxt-4.7-00DC82?logo=nuxt.js&logoColor=white)](https://nuxt.com/)
+[![Vue 3](https://img.shields.io/badge/Vue-3.5-4FC08D?logo=vue.js&logoColor=white)](https://vuejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Elasticsearch](https://img.shields.io/badge/Elasticsearch-Search_Backend-005571?logo=elasticsearch&logoColor=white)](https://www.elastic.co/)
 
-An automated payment and e-commerce storefront demo built with **Nuxt 3**, **Vue 3**, **Nitro server routes**, and **Elasticsearch**. It provides a responsive product catalog with cursor-based pagination, a client-side shopping cart with VND currency formatting, and a multi-step checkout flow supporting QR Code, bank transfer, and Cash on Delivery (COD) payment methods.
+An automated payment and e-commerce storefront demo built with **Nuxt**, **Vue 3**, **Nitro server routes**, and **Elasticsearch**. It provides a responsive product catalog with cursor-based pagination, a client-side shopping cart with VND currency formatting, and a multi-step checkout flow supporting QR Code, bank transfer, and Cash on Delivery (COD) payment methods.
+
+> **Legacy Archive**: The original Nuxt 3.11 / Vue 3.4 release is archived under tag/release [`v0.1.0-legacy`](https://github.com/sinhsac/auto-payment/releases/tag/v0.1.0-legacy).
 
 ## Key Features
 
@@ -18,8 +20,8 @@ An automated payment and e-commerce storefront demo built with **Nuxt 3**, **Vue
 
 ## Tech Stack
 
-- **Framework**: [Nuxt 3](https://nuxt.com/) (`^3.11.1`) & [Vue 3](https://vuejs.org/) (`^3.4.21`)
-- **Modules & Libraries**: `@nuxt/content`, `vue-router`, `vuex`, `qrcode`
+- **Framework**: [Nuxt 4](https://nuxt.com/) (`^4.7.0`) & [Vue 3](https://vuejs.org/) (`^3.5.46`)
+- **Modules & Libraries**: `vue-router`, `vuex`, `qrcode`
 - **Search & Data Store**: Elasticsearch REST API (via Nitro `$fetch` and `runtimeConfig`)
 - **UI Assets**: Bootstrap, Owl Carousel, Slick, jQuery, and icon fonts in `public/assets/`
 - **Process Management**: PM2 (`ecosystem.config.cjs`)
@@ -65,8 +67,8 @@ auto-payment/
 
 ## Prerequisites
 
-- **Node.js** (v18+ recommended for Nuxt 3)
-- **Yarn** (or npm / pnpm / bun)
+- **Node.js** (v22.22.3+ recommended for Nuxt 4)
+- **npm** (or yarn / pnpm / bun)
 - An accessible **Elasticsearch** instance containing the `detail_by_pc` and `shopee_categories` indices
 
 ## Getting Started
@@ -76,7 +78,7 @@ auto-payment/
 ```bash
 git clone https://github.com/sinhsac/auto-payment.git
 cd auto-payment
-yarn install
+npm install
 ```
 
 ### 2. Configure Environment Variables
@@ -96,7 +98,7 @@ NODE_TLS_REJECT_UNAUTHORIZED=0
 Start the Nuxt development server on `http://localhost:3000`:
 
 ```bash
-yarn dev
+npm run dev
 ```
 
 You can filter products by category using a query parameter, e.g. `http://localhost:3000/?category=101935`.
@@ -106,13 +108,13 @@ You can filter products by category using a query parameter, e.g. `http://localh
 Build the production bundle:
 
 ```bash
-yarn build
+npm run build
 ```
 
 Preview locally:
 
 ```bash
-yarn preview
+npm run preview
 ```
 
 Run the compiled Nitro server directly with Node.js:
