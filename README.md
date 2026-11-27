@@ -6,9 +6,13 @@
 [![Vue 3](https://img.shields.io/badge/Vue-3.5-4FC08D?logo=vue.js&logoColor=white)](https://vuejs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-22%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 
-An end-to-end automated **VietQR (NAPAS 247 / EMVCo)** e-commerce storefront and real-time bank transfer verification platform built with **Nuxt 4**, **Vue 3**, and **Nitro Server Routes**.
+A self-hosted, zero-fee automated bank transfer payment system built with **Nuxt 4**, **Vue 3**, and **Nitro Server Routes** — designed as the web/server half of a unified system together with **[auto-payment-android](https://github.com/sinhsac/auto-payment-android)**.
 
-Designed to work out of the box with zero external database setup, while integrating directly with the companion **[auto-payment-android](https://github.com/sinhsac/auto-payment-android)** notification listener app (or any bank webhook) to automatically confirm customer orders in real time via **Server-Sent Events (SSE)**.
+### How the Unified System Works (No Payment Gateway Fees)
+
+1. **Web (`auto-payment`)** creates an order with a unique reference code (e.g., `AP123456`) and displays transfer instructions (plus a local offline QR code purely so buyers don't mistype the account number, amount, or order code).
+2. **Android App (`auto-payment-android`)** runs on the merchant's Android phone, listens to incoming bank/wallet notifications (`android.bigText` / `android.text`), filters for the web-generated order code (`APxxxxxx`) + incoming credit amount, and posts it to `POST /api/webhooks/bank-notify`.
+3. **Web Server (`auto-payment`)** verifies the order code & amount, marks the order `PAID` (or `UNDERPAID` on partial payment), and pushes an instant **Server-Sent Events (SSE)** update so the buyer's browser automatically transitions to **Order Completed**.
 
 > **Legacy Archive**: The original Nuxt 3.11 / Vue 3.4 snapshot is archived under release [`v0.1.0-legacy`](https://github.com/sinhsac/auto-payment/releases/tag/v0.1.0-legacy).
 

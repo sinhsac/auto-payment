@@ -75,6 +75,18 @@ test('parseBankNotification handles Vietnamese banks, order codes, and rejects d
   assert.equal(debit.isCredit, false)
 
   assert.equal(extractOrderCode('Transfer for AP-998877 done', 'AP'), 'AP998877')
+
+  // Pre-extracted orderCode & amount sent directly from auto-payment-android
+  const fromAndroid = parseBankNotification({
+    pck: 'com.VCB',
+    title: 'Vietcombank',
+    msg: 'SD TK 0123456789 +250,000VND luc 27/11/2026',
+    orderCode: 'AP776655',
+    amount: 250000,
+  })
+  assert.equal(fromAndroid.isCredit, true)
+  assert.equal(fromAndroid.amount, 250000)
+  assert.equal(fromAndroid.orderCode, 'AP776655')
 })
 
 test('OrderStore end-to-end: partial payment, full payment, idempotency, SSE, and disk persistence', () => {

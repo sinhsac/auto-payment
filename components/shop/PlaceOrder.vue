@@ -204,10 +204,10 @@ onBeforeUnmount(() => {
                     />
                   </div>
                   <p class="small text-muted mt-3 mb-1">
-                    Mở ứng dụng Ngân hàng hoặc Ví điện tử hỗ trợ <b>VietQR (NAPAS 247)</b> và quét mã trên.
+                    Quét mã QR chuyển khoản (sinh offline để tự điền sẵn STK, số tiền &amp; mã đơn) hoặc nhập tay thông tin bên phải.
                   </p>
                   <p class="small text-success fw-semibold mb-0">
-                    Số tiền &amp; nội dung chuyển khoản đã được điền sẵn tự động.
+                    App <code>auto-payment-android</code> sẽ tự đọc thông báo biến động số dư và xác nhận đơn ngay lập tức — không qua cổng trung gian.
                   </p>
                 </div>
 

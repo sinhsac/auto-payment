@@ -9,7 +9,8 @@ export interface BankWebhookRawPayload {
   msg?: string
   pck?: string
 
-  // Optional generic webhook fields (SePay / Casso / manual test)
+  // Optional fields pre-extracted by auto-payment-android or generic webhooks
+  orderCode?: string
   amount?: number | string
   content?: string
   description?: string
@@ -151,7 +152,11 @@ export function parseBankNotification(
     reason = parsed.reason
   }
 
-  const orderCode = extractOrderCode(combined, orderPrefix)
+  const orderCodeFromText = extractOrderCode(combined, orderPrefix)
+  const preExtractedCode = payload.orderCode
+    ? extractOrderCode(String(payload.orderCode), orderPrefix) || String(payload.orderCode).trim().toUpperCase()
+    : null
+  const orderCode = orderCodeFromText || preExtractedCode
 
   // Stable fingerprint for idempotent deduplication across Android WorkManager retries
   const fpSource = payload.transactionId
