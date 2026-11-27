@@ -16,6 +16,25 @@ A self-hosted, zero-fee automated bank transfer payment system built with **Nuxt
 
 > **Legacy Archive**: The original Nuxt 3.11 / Vue 3.4 snapshot is archived under release [`v0.1.0-legacy`](https://github.com/sinhsac/auto-payment/releases/tag/v0.1.0-legacy).
 
+## Live Demo & Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/demo.gif" alt="Auto Payment End-to-End Walkthrough" width="100%" />
+</p>
+
+| Storefront & Product Catalog | Real-Time Payment QR & SSE Listener |
+| :---: | :---: |
+| ![Storefront](docs/screenshots/01-storefront.png) | ![Payment QR](docs/screenshots/02-payment-qr.png) |
+| **Auto-Confirmed Order Receipt** | **Admin Dashboard, Staff Fallback & Webhook Tester** |
+| ![Order Completed](docs/screenshots/03-order-completed.png) | ![Admin Dashboard](docs/screenshots/04-admin-dashboard.png) |
+
+<details>
+<summary>View Android Webhook Integration Guide screenshot</summary>
+
+![Android Integration Guide](docs/screenshots/05-android-integration.png)
+
+</details>
+
 ## Key Features
 
 - **Real EMVCo / VietQR Generator (`server/utils/vietqr.ts`)**: Generates standards-compliant NAPAS 247 dynamic QR codes (with exact VND amount, bank BIN, account number, order reference code, and CRC-16/CCITT-FALSE checksum) locally using `qrcode` — scannable by all major Vietnamese banking apps.

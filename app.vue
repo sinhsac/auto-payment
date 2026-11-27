@@ -42,10 +42,11 @@ useSeoMeta({
 <style>
 body {
   margin: 0;
-  padding-top: 105px;
   background-color: #f8fafc;
 }
 .header_wrap.fixed-top {
+  position: sticky;
+  top: 0;
   background-color: #ffffff;
   box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08);
 }
