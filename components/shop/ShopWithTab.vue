@@ -87,7 +87,7 @@ const cartCount = computed(() => cart.value.reduce((sum: number, i: any) => sum 
       <div class="p-4 mb-4 rounded-3 text-white" style="background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);">
         <div class="row align-items-center">
           <div class="col-lg-8">
-            <span class="badge bg-info text-dark mb-2">VietQR EMVCo + Real-time SSE</span>
+            <span class="badge bg-info text-dark mb-2">QR Offline (EMVCo) + Real-time SSE</span>
             <h2 class="text-white fw-bold mb-2">Thanh toán tự động bằng chuyển khoản QR</h2>
             <p class="mb-0 text-white-50">
               Chọn sản phẩm, tạo mã đơn duy nhất &amp; QR chuyển khoản offline — hệ thống tự động xác nhận ngay khi app <code class="text-warning">auto-payment-android</code> đọc được thông báo ngân hàng.

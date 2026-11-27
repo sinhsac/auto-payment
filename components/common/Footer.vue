@@ -13,7 +13,7 @@ const config = useRuntimeConfig()
                 <NuxtLink to="/"><img src="/assets/images/logo_light.png" alt="Auto Payment" style="max-height: 36px;" /></NuxtLink>
               </div>
               <p>
-                Hệ thống bán hàng &amp; xác nhận thanh toán tự động qua chuẩn VietQR EMVCo, tích hợp nhận thông báo biến động số dư thời gian thực qua webhook.
+                Hệ thống bán hàng &amp; xác nhận chuyển khoản tự động (tự sinh QR ngân hàng offline, nhận thông báo biến động số dư qua <code>auto-payment-android</code> — phát triển bởi <strong>Hỗ trợ giải pháp số</strong>).
               </p>
             </div>
           </div>
@@ -62,10 +62,10 @@ const config = useRuntimeConfig()
       <div class="container">
         <div class="row align-items-center">
           <div class="col-md-6">
-            <p class="mb-md-0 text-center text-md-start">© 2026 Auto Payment • MIT License</p>
+            <p class="mb-md-0 text-center text-md-start">© 2026 Auto Payment — Hỗ trợ giải pháp số • MIT License</p>
           </div>
           <div class="col-md-6 text-center text-md-end small text-muted">
-            Powered by Nuxt 4, Nitro SSE &amp; VietQR EMVCo
+            Powered by Nuxt 4, Nitro SSE &amp; Auto Payment Android
           </div>
         </div>
       </div>

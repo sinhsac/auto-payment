@@ -18,8 +18,8 @@ const errorMessage = ref('')
 const paymentMethods = computed(() => [
   {
     type: 'qr' as const,
-    name: 'VietQR (Khuyên dùng — Xác nhận tự động)',
-    desc: `Quét mã VietQR động (${config.public.bankName}) với đúng số tiền và mã đơn. Hệ thống tự động hoàn tất ngay sau vài giây.`,
+    name: 'Chuyển khoản QR tự động (Khuyên dùng)',
+    desc: `Quét mã QR sinh offline (${config.public.bankName}) với đúng số tiền và mã đơn. App auto-payment-android tự xác nhận ngay khi tiền vào.`,
   },
   {
     type: 'bank_transfer' as const,

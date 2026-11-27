@@ -1,6 +1,6 @@
 import QRCode from 'qrcode'
 
-export interface VietQrInput {
+export interface BankQrInput {
   bankBin: string
   accountNo: string
   amount: number
@@ -15,7 +15,7 @@ function tlv(tag: string, value: string): string {
 
 /**
  * Computes CRC-16/CCITT-FALSE (polynomial 0x1021, initial value 0xFFFF)
- * as required by EMVCo / VietQR Tag 63.
+ * as required by EMVCo Tag 63.
  */
 export function computeCrc16Ccitt(payload: string): string {
   let crc = 0xffff
@@ -51,19 +51,20 @@ export function sanitizePurpose(purpose: string): string {
 }
 
 /**
- * Builds an EMVCo / NAPAS 247 VietQR string scannable by Vietnamese banking apps.
+ * Builds an offline EMVCo / NAPAS 247 bank transfer QR string scannable by Vietnamese banking apps.
+ * Generated 100% locally with zero external API calls.
  */
-export function buildVietQrPayload(input: VietQrInput): string {
+export function buildBankQrPayload(input: BankQrInput): string {
   const cleanBin = input.bankBin.replace(/\D/g, '')
   const cleanAccount = input.accountNo.replace(/\s+/g, '')
   if (!cleanBin || !cleanAccount) {
-    throw new Error('bankBin and accountNo are required to build a VietQR payload')
+    throw new Error('bankBin and accountNo are required to build a bank transfer QR payload')
   }
 
   const amountInt = Math.max(0, Math.round(input.amount))
   const cleanPurpose = sanitizePurpose(input.purpose)
 
-  // Tag 38: Merchant Account Information (NAPAS VietQR)
+  // Tag 38: Merchant Account Information (NAPAS 247 IBFT)
   // 00: NAPAS GUID ("A000000727")
   // 01: Acquirer BIN (00) + Beneficiary Account Number (01)
   // 02: Service Code ("QRIBFTTA" = transfer to bank account)
@@ -92,11 +93,11 @@ export function buildVietQrPayload(input: VietQrInput): string {
   return bodyWithCrcPrefix + crc
 }
 
-export async function generateVietQrDataUrl(input: VietQrInput): Promise<{
+export async function generateBankQrDataUrl(input: BankQrInput): Promise<{
   payload: string
   dataUrl: string
 }> {
-  const payload = buildVietQrPayload(input)
+  const payload = buildBankQrPayload(input)
   const dataUrl = await QRCode.toDataURL(payload, {
     errorCorrectionLevel: 'M',
     margin: 2,

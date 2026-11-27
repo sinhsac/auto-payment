@@ -16,7 +16,7 @@ export default defineNuxtConfig({
     elasticsearchBaseUrl: '',
     elasticsearchToken: '',
 
-    // VietQR / Bank Transfer settings (override via NUXT_BANK_* env vars)
+    // Offline EMVCo / Bank Transfer settings (override via NUXT_BANK_* env vars)
     bankBin: '970436', // Vietcombank NAPAS BIN (e.g. 970436 VCB, 970422 MB, 970407 TCB, 970416 ACB)
     bankName: 'Vietcombank',
     bankAccountNo: '0123456789',

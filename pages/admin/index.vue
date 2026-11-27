@@ -142,7 +142,7 @@ const badgeClass = (status: string) => {
       <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
         <div>
           <h3 class="fw-bold mb-0">Quản trị Đơn hàng &amp; Bank Webhook</h3>
-          <p class="text-muted small mb-0">Theo dõi đơn hàng VietQR, log thông báo ngân hàng và kiểm thử webhook <code>auto-payment-android</code></p>
+          <p class="text-muted small mb-0">Theo dõi đơn hàng chuyển khoản QR, log thông báo ngân hàng và kiểm thử webhook <code>auto-payment-android</code></p>
         </div>
         <div class="d-flex gap-2">
           <button class="btn btn-outline-primary btn-sm" @click="refreshAll">↻ Làm mới</button>
@@ -212,7 +212,7 @@ const badgeClass = (status: string) => {
             <tbody>
               <tr v-if="orders.length === 0">
                 <td colspan="7" class="text-center py-4 text-muted">
-                  Chưa có đơn hàng nào. Hãy <NuxtLink to="/">đặt thử một đơn hàng</NuxtLink> để kiểm tra quy trình VietQR!
+                  Chưa có đơn hàng nào. Hãy <NuxtLink to="/">đặt thử một đơn hàng</NuxtLink> để kiểm tra quy trình xác nhận tự động!
                 </td>
               </tr>
               <tr v-for="order in orders" :key="order.orderCode">

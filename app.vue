@@ -23,10 +23,10 @@ useHead({
 })
 
 useSeoMeta({
-  title: 'Auto Payment — VietQR Automated Payment Storefront',
-  ogTitle: 'Auto Payment — VietQR Automated Payment Storefront',
-  description: 'Open-source Nuxt storefront with dynamic VietQR EMVCo checkout, real-time SSE payment confirmation, and Vietnamese bank notification webhook verification.',
-  ogDescription: 'Open-source Nuxt storefront with dynamic VietQR EMVCo checkout, real-time SSE payment confirmation, and Vietnamese bank notification webhook verification.',
+  title: 'Auto Payment — Self-Hosted Automated Bank Transfer Checkout',
+  ogTitle: 'Auto Payment — Self-Hosted Automated Bank Transfer Checkout',
+  description: 'Open-source Nuxt 4 storefront with built-in offline EMVCo bank QR generator, real-time SSE payment confirmation, and Android notification listener webhook by Hỗ trợ giải pháp số.',
+  ogDescription: 'Open-source Nuxt 4 storefront with built-in offline EMVCo bank QR generator, real-time SSE payment confirmation, and Android notification listener webhook by Hỗ trợ giải pháp số.',
   twitterCard: 'summary_large_image',
 })
 </script>

@@ -17,7 +17,7 @@ const openStorefront = () => {
         <div class="row align-items-center">
           <div class="col-md-7">
             <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-3">
-              <span class="badge bg-success">VietQR Auto-Verify</span>
+              <span class="badge bg-success">Auto Payment • Hỗ trợ giải pháp số</span>
               <span class="small text-muted">
                 <i class="ti-mobile me-1"></i>{{ config.public.supportPhone }}
               </span>

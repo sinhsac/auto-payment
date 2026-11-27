@@ -37,7 +37,7 @@ A self-hosted, zero-fee automated bank transfer payment system built with **Nuxt
 
 ## Key Features
 
-- **Real EMVCo / VietQR Generator (`server/utils/vietqr.ts`)**: Generates standards-compliant NAPAS 247 dynamic QR codes (with exact VND amount, bank BIN, account number, order reference code, and CRC-16/CCITT-FALSE checksum) locally using `qrcode` — scannable by all major Vietnamese banking apps.
+- **Built-in Offline EMVCo Bank QR Generator (`server/utils/bankQr.ts`)**: Generates standards-compliant NAPAS 247 / EMVCo QR payloads locally using `qrcode` (exact VND amount, bank BIN, account number, order code, CRC-16/CCITT-FALSE checksum) — **zero third-party QR or payment gateway API calls**.
 - **Automated Bank Notification Webhook (`POST /api/webhooks/bank-notify`)**:
   - 100% compatible with **`auto-payment-android`**'s `XInfo` JSON payload (`groupKey`, `postTime`, `strPostTime`, `title`, `msg`, `pck`) as well as generic `{ amount, content, transactionId, bank }` webhooks.
   - Parses incoming credit alerts from **Vietcombank, Techcombank, MBBank, VPBank, BIDV, ACB, TPBank, VietinBank, Sacombank, Timo, MoMo, and ZaloPay**.
@@ -57,7 +57,7 @@ A self-hosted, zero-fee automated bank transfer payment system built with **Nuxt
 | `GET` | `/api/categories` | Lists product categories (Elasticsearch or built-in demo catalog). |
 | `GET` | `/api/categories/:id` | Returns a single category by `catid`. |
 | `GET` | `/api/products` | Lists/filters products by `category`, `q` (search), and `lastId` (ES pagination). |
-| `POST` | `/api/orders` | Creates a new order (`qr`, `bank_transfer`, or `cod`) and generates a dynamic VietQR code. |
+| `POST` | `/api/orders` | Creates a new order (`qr`, `bank_transfer`, or `cod`) and generates an offline bank transfer QR code. |
 | `GET` | `/api/orders` | Lists orders (`?status=`, `?q=`) and summary KPI stats for `/admin`. |
 | `GET` | `/api/orders/:code` | Retrieves live order details (auto-expires unpaid QR orders past deadline). |
 | `GET` | `/api/orders/:code/stream` | Server-Sent Events (SSE) real-time stream for order payment updates. |
@@ -79,8 +79,8 @@ npm run dev
 
 Open **`http://localhost:3000`**:
 1. Add any product to the cart and click **Thanh toán**.
-2. Fill in customer details, choose **VietQR**, and place the order.
-3. On `/orders/APxxxxxx`, scan the generated VietQR code or click **"Giả lập chuyển khoản ĐỦ (Auto-Confirm)"** — the page immediately transitions to **Order Completed** via SSE.
+2. Fill in customer details, choose **Chuyển khoản QR tự động**, and place the order.
+3. On `/orders/APxxxxxx`, scan the locally generated transfer QR code or click **"Giả lập chuyển khoản ĐỦ (Auto-Confirm)"** — the page immediately transitions to **Order Completed** via SSE.
 4. Visit **`http://localhost:3000/admin`** to inspect orders, revenue stats, and webhook logs, or test custom Vietnamese bank notification messages.
 
 ### 2. Configure Your Bank Account & Webhook Secret
@@ -130,7 +130,7 @@ curl -X POST http://localhost:3000/api/webhooks/bank-notify \
 ## Testing & Production Deployment
 
 ```bash
-# Run automated unit & integration tests (VietQR CRC16, bank parser, OrderStore)
+# Run automated unit & integration tests (EMVCo QR CRC16, bank parser, OrderStore)
 npm test
 
 # Build production bundle

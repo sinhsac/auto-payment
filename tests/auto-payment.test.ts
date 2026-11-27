@@ -4,7 +4,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
-import { buildVietQrPayload, computeCrc16Ccitt, generateVietQrDataUrl } from '../server/utils/vietqr.ts'
+import { buildBankQrPayload, computeCrc16Ccitt, generateBankQrDataUrl } from '../server/utils/bankQr.ts'
 import { extractOrderCode, parseBankNotification } from '../server/utils/bankParser.ts'
 import { OrderStore } from '../server/utils/orderStore.ts'
 
@@ -12,8 +12,8 @@ test('computeCrc16Ccitt matches EMVCo CCITT-FALSE reference vector', () => {
   assert.equal(computeCrc16Ccitt('123456789'), '29B1')
 })
 
-test('buildVietQrPayload creates valid NAPAS 247 EMVCo QR string with valid CRC16', async () => {
-  const payload = buildVietQrPayload({
+test('buildBankQrPayload creates valid NAPAS 247 EMVCo QR string with valid CRC16', async () => {
+  const payload = buildBankQrPayload({
     bankBin: '970436',
     accountNo: '0123456789',
     amount: 150000,
@@ -35,7 +35,7 @@ test('buildVietQrPayload creates valid NAPAS 247 EMVCo QR string with valid CRC1
   const embeddedCrc = payload.slice(-4)
   assert.equal(embeddedCrc, computeCrc16Ccitt(bodyWithoutCrc))
 
-  const { dataUrl } = await generateVietQrDataUrl({
+  const { dataUrl } = await generateBankQrDataUrl({
     bankBin: '970436',
     accountNo: '0123456789',
     amount: 150000,

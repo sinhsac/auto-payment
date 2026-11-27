@@ -199,7 +199,7 @@ onBeforeUnmount(() => {
                     <img
                       v-if="activeOrder.bankInfo?.qrDataUrl"
                       :src="activeOrder.bankInfo.qrDataUrl"
-                      :alt="`VietQR ${activeOrder.orderCode}`"
+                      :alt="`QR chuyển khoản ${activeOrder.orderCode}`"
                       style="width: 260px; height: 260px;"
                     />
                   </div>

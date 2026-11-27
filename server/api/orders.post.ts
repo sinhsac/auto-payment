@@ -1,5 +1,5 @@
 import { getOrderStore, type PaymentMethod } from '~/server/utils/orderStore'
-import { generateVietQrDataUrl } from '~/server/utils/vietqr'
+import { generateBankQrDataUrl } from '~/server/utils/bankQr'
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event)
@@ -42,7 +42,7 @@ export default defineEventHandler(async (event) => {
     const accountName = String(config.bankAccountName || 'AUTO PAYMENT DEMO')
     const transferContent = `${orderCode}`
 
-    const { payload, dataUrl } = await generateVietQrDataUrl({
+    const { payload, dataUrl } = await generateBankQrDataUrl({
       bankBin,
       accountNo,
       amount: totalAmount,
