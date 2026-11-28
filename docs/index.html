@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auto Payment — Official Setup &amp; API Guide</title>
+  <meta name="description" content="Complete guide for Auto Payment: self-hosted zero-fee automated bank transfer checkout in Nuxt 4 with offline EMVCo QR codes, Android notification webhook, and real-time SSE." />
+  <link rel="stylesheet" href="https://sinhsac.github.io/assets/shared.css" />
+  <script>
+    (function(){try{var t=localStorage.getItem("sinhsac-theme");if(t==="dark"||(!t&&matchMedia("(prefers-color-scheme:dark)").matches))document.documentElement.setAttribute("data-theme","dark");}catch(e){}})();
+  </script>
+</head>
+<body data-page="guide" data-current-repo="auto-payment">
+  <header id="site-header"></header>
+
+  <div class="docs-layout">
+    <aside id="docs-sidebar"></aside>
+
+    <main class="docs-main">
+      <div class="doc-hero">
+        <div class="doc-breadcrumbs">
+          <a href="https://sinhsac.github.io/">sinhsac.github.io</a>
+          <span>/</span>
+          <span>auto-payment</span>
+        </div>
+        <h1>Auto Payment</h1>
+        <p class="doc-lead">
+          Self-hosted, zero-fee automated bank transfer checkout built with <strong>Nuxt 4</strong>, <strong>Vue 3</strong>, and <strong>Nitro Server Routes</strong> — paired with <a href="https://sinhsac.github.io/guide.html?repo=auto-payment-android">auto-payment-android</a> for instant SSE confirmation.
+        </p>
+        <div class="doc-badges">
+          <span class="pill">Nuxt 4.7 · Vue 3.5</span>
+          <span class="pill">Node.js 22+</span>
+          <span class="pill">Offline EMVCo / NAPAS 247 QR</span>
+          <span class="pill">Real-Time SSE</span>
+          <span class="pill">MIT License</span>
+        </div>
+        <div class="doc-hero-actions">
+          <a class="btn btn-primary" href="#quick-start">Quick Start ↓</a>
+          <a class="btn" href="https://github.com/sinhsac/auto-payment" target="_blank" rel="noopener">GitHub Repository ↗</a>
+          <a class="btn" href="https://sinhsac.github.io/guide.html?repo=auto-payment-android">Android Companion Guide →</a>
+        </div>
+        <div class="doc-hero-media">
+          <img src="./screenshots/demo.gif" alt="Auto Payment End-to-End Walkthrough" />
+        </div>
+      </div>
+
+      <article class="doc-article" id="doc-content">
+        <h2>How the Zero-Fee Architecture Works</h2>
+        <p>
+          Instead of paying percentage fees to third-party payment gateways, <strong>Auto Payment</strong> connects your own web checkout directly to bank push notifications arriving on your Android phone:
+        </p>
+
+        <div class="step-grid">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <h4>Create Order &amp; Local QR</h4>
+            <p>The Nuxt server assigns a unique reference code (e.g. <code>AP123456</code>) and renders an offline EMVCo / NAPAS 247 QR code locally using <code>server/utils/bankQr.ts</code> with exact amount &amp; CRC-16.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <h4>Android Listens to Bank Alerts</h4>
+            <p><a href="https://github.com/sinhsac/auto-payment-android" target="_blank" rel="noopener">auto-payment-android</a> reads incoming bank/wallet notifications, matches the order code &amp; credit amount, and posts to <code>POST /api/webhooks/bank-notify</code>.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <h4>Instant SSE Order Confirmation</h4>
+            <p>The server verifies the order code and amount, marks the order <code>PAID</code> (or <code>UNDERPAID</code> on partial transfers), and pushes an instant SSE event to the buyer's browser.</p>
+          </div>
+        </div>
+
+        <h2>Screenshots &amp; Walkthrough</h2>
+        <div class="screenshot-grid">
+          <figure class="screenshot-card">
+            <img src="./screenshots/01-storefront.png" alt="Storefront and Product Catalog" loading="lazy" />
+            <figcaption>1. Storefront &amp; Built-in Demo Product Catalog</figcaption>
+          </figure>
+          <figure class="screenshot-card">
+            <img src="./screenshots/02-payment-qr.png" alt="Real-Time Payment QR and SSE Listener" loading="lazy" />
+            <figcaption>2. Offline EMVCo Transfer QR &amp; Live SSE Listener</figcaption>
+          </figure>
+          <figure class="screenshot-card">
+            <img src="./screenshots/03-order-completed.png" alt="Auto-Confirmed Order Receipt" loading="lazy" />
+            <figcaption>3. Auto-Confirmed Order Receipt (/orders/:code)</figcaption>
+          </figure>
+          <figure class="screenshot-card">
+            <img src="./screenshots/04-admin-dashboard.png" alt="Admin Dashboard and Webhook Simulator" loading="lazy" />
+            <figcaption>4. Admin Dashboard, Manual Fallback &amp; Webhook Tester</figcaption>
+          </figure>
+        </div>
+
+        <h2>Key Capabilities</h2>
+        <ul>
+          <li><strong>Offline EMVCo / NAPAS 247 QR Generator:</strong> Zero external QR API dependencies — builds CRC-16/CCITT-FALSE validated QR payloads directly on your server.</li>
+          <li><strong>12 Supported Vietnamese Banks &amp; Wallets:</strong> Parses credit alerts from <em>Vietcombank, Techcombank, MBBank, VPBank, BIDV, ACB, TPBank, VietinBank, Sacombank, Timo, MoMo, and ZaloPay</em>.</li>
+          <li><strong>Debit &amp; Duplicate Protection:</strong> Automatically rejects outgoing debits (<code>-150,000VND</code>), deduplicates repeated notifications idempotently, and tracks partial payments (<code>UNDERPAID</code>) until paid in full.</li>
+          <li><strong>Zero-Config Persistence + Optional Elasticsearch:</strong> Ships with 12 demo products and atomic JSON persistence (<code>data/store.json</code>) out of the box; switches to Elasticsearch automatically when <code>NUXT_ELASTICSEARCH_BASE_URL</code> and <code>NUXT_ELASTICSEARCH_TOKEN</code> are provided.</li>
+          <li><strong>Admin Dashboard (<code>/admin</code>):</strong> Live revenue KPIs, filterable order table, manual staff approval/cancellation fallback, webhook audit logs, and an interactive webhook simulator.</li>
+        </ul>
+
+        <h2 id="quick-start">Quick Start (Local Development)</h2>
+        <pre><code>git clone https://github.com/sinhsac/auto-payment.git
+cd auto-payment
+npm install
+npm run dev</code></pre>
+
+        <p>Open <code>http://localhost:3000</code> in your browser:</p>
+        <ol>
+          <li>Add any product to the cart and proceed to checkout.</li>
+          <li>Fill in customer info, select <strong>QR Auto Transfer</strong>, and place the order.</li>
+          <li>On <code>/orders/APxxxxxx</code>, scan the QR code or click the built-in simulator button to watch the screen auto-confirm via SSE.</li>
+          <li>Open <code>http://localhost:3000/admin</code> to monitor revenue KPIs, order states, and webhook audit logs.</li>
+        </ol>
+
+        <h2>Bank Account &amp; Webhook Configuration</h2>
+        <p>Copy <code>local.env</code> to <code>.env</code> and set your bank credentials and webhook secret:</p>
+        <pre><code>NUXT_BANK_BIN=970436
+NUXT_BANK_NAME=Vietcombank
+NUXT_BANK_ACCOUNT_NO=0123456789
+NUXT_BANK_ACCOUNT_NAME=YOUR ACCOUNT NAME
+NUXT_ORDER_PREFIX=AP
+NUXT_ORDER_EXPIRY_MINUTES=15
+
+NUXT_PUBLIC_BANK_NAME=Vietcombank
+NUXT_PUBLIC_BANK_ACCOUNT_NO=0123456789
+NUXT_PUBLIC_BANK_ACCOUNT_NAME=YOUR ACCOUNT NAME
+
+# Recommended in production:
+NUXT_WEBHOOK_SECRET=replace-with-a-strong-random-secret
+NUXT_PUBLIC_ENABLE_DEMO_SIMULATOR=false</code></pre>
+
+        <div class="callout callout-warn">
+          <div class="callout-title">Production Hardening</div>
+          <p>Always set a strong <code>NUXT_WEBHOOK_SECRET</code> (verified in constant time via <code>X-Webhook-Secret</code> or <code>Authorization: Bearer</code>) and set <code>NUXT_PUBLIC_ENABLE_DEMO_SIMULATOR=false</code> before exposing the site publicly.</p>
+        </div>
+
+        <h2>Connecting <code>auto-payment-android</code></h2>
+        <p>
+          Configure <code>PushingWorker.kt</code> inside <a href="https://github.com/sinhsac/auto-payment-android" target="_blank" rel="noopener">auto-payment-android</a> to POST incoming bank notifications to:
+        </p>
+        <pre><code>POST https://your-domain.com/api/webhooks/bank-notify</code></pre>
+
+        <figure class="screenshot-card" style="margin-bottom:20px;">
+          <img src="./screenshots/05-android-integration.png" alt="Android Integration Guide Screen" loading="lazy" />
+          <figcaption>Built-in Android Webhook Integration Reference inside /admin</figcaption>
+        </figure>
+
+        <h3>Test the Webhook with <code>curl</code></h3>
+        <pre><code>curl -X POST http://localhost:3000/api/webhooks/bank-notify \
+  -H "Content-Type: application/json" \
+  -H "X-Webhook-Secret: your-secret" \
+  -d '{
+    "groupKey": "0|com.VCB|123",
+    "strPostTime": "2026-11-27 17:30:00",
+    "title": "Vietcombank",
+    "msg": "SD TK 0123456789 +150,000VND luc 27/11/2026. ND: AP123456",
+    "pck": "com.VCB"
+  }'</code></pre>
+
+        <h2>API Reference</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Endpoint</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>GET</code></td><td><code>/api/categories</code></td><td>Lists product categories (Elasticsearch or built-in demo catalog).</td></tr>
+            <tr><td><code>GET</code></td><td><code>/api/categories/:id</code></td><td>Returns a single category by <code>catid</code>.</td></tr>
+            <tr><td><code>GET</code></td><td><code>/api/products</code></td><td>Lists/filters products by <code>category</code>, <code>q</code>, and <code>lastId</code>.</td></tr>
+            <tr><td><code>POST</code></td><td><code>/api/orders</code></td><td>Creates a new order (<code>qr</code>, <code>bank_transfer</code>, or <code>cod</code>) with offline bank QR.</td></tr>
+            <tr><td><code>GET</code></td><td><code>/api/orders</code></td><td>Lists orders (<code>?status=</code>, <code>?q=</code>) and summary KPIs for <code>/admin</code>.</td></tr>
+            <tr><td><code>GET</code></td><td><code>/api/orders/:code</code></td><td>Returns live order state (auto-expires unpaid QR orders past deadline).</td></tr>
+            <tr><td><code>GET</code></td><td><code>/api/orders/:code/stream</code></td><td>Server-Sent Events (SSE) stream pushing instant payment updates.</td></tr>
+            <tr><td><code>POST</code></td><td><code>/api/orders/:code/action</code></td><td>Manual staff confirmation (<code>confirm_by_staff</code>) or cancellation (<code>cancel</code>).</td></tr>
+            <tr><td><code>GET</code></td><td><code>/api/health</code></td><td>Health check for server monitoring and Android connectivity verification.</td></tr>
+            <tr><td><code>POST</code></td><td><code>/api/webhooks/bank-notify</code></td><td>Receives <code>auto-payment-android</code> <code>XInfo</code> or generic JSON bank credit webhooks.</td></tr>
+            <tr><td><code>GET</code></td><td><code>/api/webhooks/logs</code></td><td>Returns recent webhook audit logs and matching outcomes.</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Testing &amp; Production Deployment</h2>
+        <pre><code># Run automated unit &amp; integration tests (EMVCo CRC16, bank parser, OrderStore)
+npm test
+
+# Build production Nitro bundle
+npm run build
+
+# Start production server directly
+node .output/server/index.mjs
+
+# Or run under PM2 (port 3030)
+pm2 start ecosystem.config.cjs</code></pre>
+      </article>
+
+      <div id="doc-footer-nav"></div>
+    </main>
+
+    <aside id="docs-toc"></aside>
+  </div>
+
+  <footer id="site-footer"></footer>
+
+  <script src="https://sinhsac.github.io/data/projects.js"></script>
+  <script src="https://sinhsac.github.io/assets/guide-shell.js"></script>
+</body>
+</html>
